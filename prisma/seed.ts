@@ -2,6 +2,7 @@ import "dotenv/config";
 import { PrismaClient, Role, PropertyStatus, PropertyTemperature, PropertyType, LeadStatus, LeadTemperature, VisitStatus, ProposalStatus } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import bcrypt from "bcryptjs";
+import { randomBytes } from "crypto";
 import { createPgPool } from "../src/lib/pg-pool";
 
 const connectionString = process.env.DATABASE_URL;
@@ -24,7 +25,10 @@ async function main() {
   await prisma.user.deleteMany();
   await prisma.team.deleteMany();
 
-  const passwordHash = await bcrypt.hash("senha123", 10);
+  // Senha gerada na hora — não fica no repositório; só aparece no terminal
+  const password = randomBytes(9).toString("base64url");
+  const passwordHash = await bcrypt.hash(password, 10);
+
 
   const team = await prisma.team.create({
     data: { name: "Imobiliária Horizonte" },
@@ -288,6 +292,7 @@ async function main() {
   console.log("Seed OK", {
     team: team.id,
     users: [joao.email, rafael.email, carla.email],
+    password,
     properties: [p1.code, p2.code, p3.code, p4.code],
     proposal: prop1.id,
   });

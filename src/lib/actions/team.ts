@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { Role } from "@prisma/client";
 import bcrypt from "bcryptjs";
+import { randomBytes } from "crypto";
 import { prisma } from "@/lib/prisma";
 import { isManager, requireSession } from "@/lib/permissions";
 
@@ -32,10 +33,14 @@ export async function inviteTeamMember(input: {
   if (!session.user.teamId) throw new Error("Sem time");
   if (!input.email?.includes("@")) throw new Error("E-mail inválido");
 
-  const existing = await prisma.user.findUnique({ where: { email: input.email.toLowerCase() } });
+  const existing = await prisma.user.findUnique({
+    where: { email: input.email.toLowerCase() },
+  });
   if (existing) throw new Error("E-mail já cadastrado");
 
-  const passwordHash = await bcrypt.hash("senha123", 10);
+  // Senha temporária aleatória — conta fica inactive até ativação
+  const tempPassword = randomBytes(18).toString("base64url");
+  const passwordHash = await bcrypt.hash(tempPassword, 10);
   const user = await prisma.user.create({
     data: {
       name: input.name || input.email.split("@")[0],
@@ -48,5 +53,6 @@ export async function inviteTeamMember(input: {
   });
 
   revalidatePath("/equipe");
+  // Não devolve a senha ao client
   return { id: user.id, email: user.email, active: user.active };
 }
