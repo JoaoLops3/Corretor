@@ -1,6 +1,5 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { LeadStatus, VisitStatus, ProposalStatus, PropertyStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { isManager, requireSession } from "@/lib/permissions";

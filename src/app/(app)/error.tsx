@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { ErrorState } from "@/components/ui/error-state";
 
-export default function Error({
+export default function AppError({
   error,
   reset,
 }: {
@@ -11,14 +11,15 @@ export default function Error({
   reset: () => void;
 }) {
   useEffect(() => {
-    console.error("[app-error]", error);
+    console.error("[app-segment-error]", error);
   }, [error]);
 
   return (
     <ErrorState
+      compact
       code="500"
-      title="Algo deu errado"
-      description="Não foi possível carregar esta tela. Tenta de novo — se persistir, avisa o time técnico."
+      title="Falha nesta tela"
+      description="Aconteceu um erro ao carregar este conteúdo. Você pode tentar de novo ou voltar ao início."
       onPrimary={reset}
       digest={error.digest}
     />

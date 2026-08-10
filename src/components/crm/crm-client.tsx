@@ -34,10 +34,10 @@ export type LeadView = {
   propertyId: string | null;
 };
 
-const columnsOrder: LeadColumn[] = ["NOVO", "EM_VISITA", "PROPOSTA", "FECHADO"];
+const columnsOrder: LeadColumn[] = ["NOVO", "EM_VISITA", "PROPOSTA", "FECHADO", "PERDIDO"];
 
 function toColumn(status: LeadStatus): LeadColumn {
-  return (status === "PERDIDO" ? "FECHADO" : status) as LeadColumn;
+  return status as LeadColumn;
 }
 
 function LeadCardContent({ lead }: { lead: LeadView }) {
@@ -140,14 +140,18 @@ function resolveTargetColumn(
 export function CrmClient({
   initialLeads,
   openNew,
+  initialLeadId,
 }: {
   initialLeads: LeadView[];
   openNew?: boolean;
+  initialLeadId?: string | null;
 }) {
   const router = useRouter();
   const showToast = useToast();
   const [newOpen, setNewOpen] = useState(!!openNew);
-  const [selected, setSelected] = useState<LeadView | null>(null);
+  const [selected, setSelected] = useState<LeadView | null>(
+    () => initialLeads.find((l) => l.id === initialLeadId) ?? null,
+  );
   const [leads, setLeads] = useState(initialLeads);
   const [activeLead, setActiveLead] = useState<LeadView | null>(null);
   const suppressClick = useRef(false);
@@ -168,6 +172,7 @@ export function CrmClient({
       EM_VISITA: [],
       PROPOSTA: [],
       FECHADO: [],
+      PERDIDO: [],
     };
     for (const lead of leads) {
       map[toColumn(lead.status)].push(lead);

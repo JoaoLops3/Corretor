@@ -1,11 +1,12 @@
 import { ErrorState } from "@/components/ui/error-state";
 
-export default function NotFound() {
+export default function AppNotFound() {
   return (
     <ErrorState
+      compact
       code="404"
-      title="Página não encontrada"
-      description="Esse endereço não existe ou o recurso foi removido. Vamos te levar de volta."
+      title="Não encontrado"
+      description="Esse endereço não existe dentro do Prancheta."
       secondaryHref="/"
       secondaryLabel="Voltar ao início"
     />

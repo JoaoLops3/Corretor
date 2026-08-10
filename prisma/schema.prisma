@@ -122,6 +122,7 @@ model Property {
 
   @@index([status])
   @@index([brokerId])
+  @@index([teamId])
 }
 
 model PropertyPhoto {

@@ -38,22 +38,26 @@ export async function createProposal(input: {
   await assertCanAccessProperty(session, input.propertyId);
   await assertCanAccessLead(session, input.leadId);
 
-  const proposal = await prisma.proposal.create({
-    data: {
-      propertyId: input.propertyId,
-      leadId: input.leadId,
-      value: input.value,
-      status: ProposalStatus.PROPOSTA,
-      brokerId: session.user.id!,
-      statusHistory: {
-        create: [{ status: ProposalStatus.PROPOSTA, changedBy: session.user.id }],
+  const proposal = await prisma.$transaction(async (tx) => {
+    const created = await tx.proposal.create({
+      data: {
+        propertyId: input.propertyId,
+        leadId: input.leadId,
+        value: input.value,
+        status: ProposalStatus.PROPOSTA,
+        brokerId: session.user.id!,
+        statusHistory: {
+          create: [{ status: ProposalStatus.PROPOSTA, changedBy: session.user.id }],
+        },
       },
-    },
-  });
+    });
 
-  await prisma.lead.update({
-    where: { id: input.leadId },
-    data: { status: "PROPOSTA", propertyId: input.propertyId },
+    await tx.lead.update({
+      where: { id: input.leadId },
+      data: { status: "PROPOSTA", propertyId: input.propertyId },
+    });
+
+    return created;
   });
 
   revalidatePath("/propostas");

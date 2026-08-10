@@ -15,24 +15,37 @@ export function ImoveisClient({
   openNew,
   viewingTeamMember,
   ownerName,
+  initialSearch = "",
 }: {
   initialProperties: PropertyView[];
   openNew?: boolean;
   viewingTeamMember?: boolean;
   ownerName?: string | null;
+  initialSearch?: string;
 }) {
   const router = useRouter();
   const [statusFilter, setStatusFilter] = useState<"todos" | PropertyStatus>("todos");
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(initialSearch);
   const [formOpen, setFormOpen] = useState(!!openNew);
   const [editing, setEditing] = useState<PropertyView | null>(null);
-  const [selected, setSelected] = useState<PropertyView | null>(null);
+  const [selected, setSelected] = useState<PropertyView | null>(() => {
+    if (!initialSearch) return null;
+    const q = initialSearch.toLowerCase();
+    return (
+      initialProperties.find(
+        (p) => p.code.toLowerCase() === q || p.title.toLowerCase().includes(q),
+      ) ?? null
+    );
+  });
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase().trim();
     return initialProperties.filter((p) => {
       const statusOk = statusFilter === "todos" || p.status === statusFilter;
-      const searchOk = !q || p.title.toLowerCase().includes(q);
+      const searchOk =
+        !q ||
+        p.title.toLowerCase().includes(q) ||
+        p.code.toLowerCase().includes(q);
       return statusOk && searchOk;
     });
   }, [initialProperties, statusFilter, search]);

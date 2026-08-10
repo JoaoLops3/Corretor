@@ -44,21 +44,25 @@ export async function createVisit(input: {
   await assertCanAccessProperty(session, input.propertyId);
   await assertCanAccessLead(session, input.leadId);
 
-  const visit = await prisma.visit.create({
-    data: {
-      propertyId: input.propertyId,
-      leadId: input.leadId,
-      brokerId: session.user.id!,
-      scheduledAt: new Date(input.scheduledAt),
-      durationMinutes: input.durationMinutes ?? 30,
-      notes: input.notes,
-      status: VisitStatus.AGENDADA,
-    },
-  });
+  const visit = await prisma.$transaction(async (tx) => {
+    const created = await tx.visit.create({
+      data: {
+        propertyId: input.propertyId,
+        leadId: input.leadId,
+        brokerId: session.user.id!,
+        scheduledAt: new Date(input.scheduledAt),
+        durationMinutes: input.durationMinutes ?? 30,
+        notes: input.notes,
+        status: VisitStatus.AGENDADA,
+      },
+    });
 
-  await prisma.lead.update({
-    where: { id: input.leadId },
-    data: { status: "EM_VISITA", propertyId: input.propertyId },
+    await tx.lead.update({
+      where: { id: input.leadId },
+      data: { status: "EM_VISITA", propertyId: input.propertyId },
+    });
+
+    return created;
   });
 
   revalidatePath("/calendario");

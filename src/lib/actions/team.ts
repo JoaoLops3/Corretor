@@ -12,15 +12,23 @@ export async function listTeamMembers() {
   if (!isManager(session)) throw new Error("Sem permissão");
   if (!session.user.teamId) return [];
 
-  const users = await prisma.user.findMany({
+  return prisma.user.findMany({
     where: { teamId: session.user.teamId },
-    include: {
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      creci: true,
+      phone: true,
+      avatarUrl: true,
+      active: true,
+      createdAt: true,
+      teamId: true,
       _count: { select: { properties: true, leads: true, visits: true } },
     },
     orderBy: [{ role: "asc" }, { name: "asc" }],
   });
-
-  return users;
 }
 
 export async function inviteTeamMember(input: {
@@ -31,26 +39,32 @@ export async function inviteTeamMember(input: {
   const session = await requireSession();
   if (!isManager(session)) throw new Error("Só gerente pode convidar");
   if (!session.user.teamId) throw new Error("Sem time");
-  if (!input.email?.includes("@")) throw new Error("E-mail inválido");
 
-  const existing = await prisma.user.findUnique({
-    where: { email: input.email.toLowerCase() },
-  });
+  const email = input.email.trim().toLowerCase();
+  if (!email.includes("@")) throw new Error("E-mail inválido");
+
+  const existing = await prisma.user.findUnique({ where: { email } });
   if (existing) throw new Error("E-mail já cadastrado");
 
-  const tempPassword = randomBytes(18).toString("base64url");
-  const passwordHash = await bcrypt.hash(tempPassword, 10);
+  const temporaryPassword = randomBytes(9).toString("base64url");
+  const passwordHash = await bcrypt.hash(temporaryPassword, 10);
   const user = await prisma.user.create({
     data: {
-      name: input.name || input.email.split("@")[0],
-      email: input.email.toLowerCase(),
+      name: input.name.trim() || email.split("@")[0],
+      email,
       passwordHash,
       role: input.role ?? Role.CORRETOR,
       teamId: session.user.teamId,
-      active: false,
+      active: true,
     },
+    select: { id: true, email: true, active: true },
   });
 
   revalidatePath("/equipe");
-  return { id: user.id, email: user.email, active: user.active };
+  return {
+    id: user.id,
+    email: user.email,
+    active: user.active,
+    temporaryPassword,
+  };
 }

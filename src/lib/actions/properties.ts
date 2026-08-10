@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { PropertyStatus, PropertyTemperature, PropertyType, Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { canAccessBrokerData, requireSession } from "@/lib/permissions";
+import { propertyScopeWhere } from "@/lib/scope";
 import { geocodeAddress } from "@/lib/geocode";
 
 export type PropertyInput = {
@@ -25,9 +26,16 @@ export type PropertyInput = {
   description?: string;
 };
 
-function nextCode() {
-  const n = Math.floor(1000 + Math.random() * 9000);
-  return `IM-${n}`;
+async function allocatePropertyCode(): Promise<string> {
+  for (let attempt = 0; attempt < 8; attempt++) {
+    const code = `IM-${Math.floor(1000 + Math.random() * 9000)}`;
+    const exists = await prisma.property.findUnique({
+      where: { code },
+      select: { id: true },
+    });
+    if (!exists) return code;
+  }
+  return `IM-${Date.now().toString().slice(-6)}`;
 }
 
 export async function listProperties(opts?: {
@@ -36,14 +44,19 @@ export async function listProperties(opts?: {
   search?: string;
 }) {
   const session = await requireSession();
-  const brokerId = opts?.brokerId || session.user.id!;
 
-  if (!(await canAccessBrokerData(session, brokerId))) {
-    throw new Error("Sem permissão");
+  let scope: Prisma.PropertyWhereInput;
+  if (opts?.brokerId) {
+    if (!(await canAccessBrokerData(session, opts.brokerId))) {
+      throw new Error("Sem permissão");
+    }
+    scope = { brokerId: opts.brokerId };
+  } else {
+    scope = propertyScopeWhere(session);
   }
 
   const where: Prisma.PropertyWhereInput = {
-    brokerId,
+    ...scope,
     ...(opts?.status && opts.status !== "todos" ? { status: opts.status } : {}),
     ...(opts?.search
       ? { title: { contains: opts.search, mode: "insensitive" } }
@@ -86,9 +99,11 @@ export async function createProperty(input: PropertyInput) {
     state: input.addressState ?? "SP",
   });
 
+  const code = input.code?.replace(/^#/, "") || (await allocatePropertyCode());
+
   const property = await prisma.property.create({
     data: {
-      code: input.code?.replace(/^#/, "") || nextCode(),
+      code,
       title: input.title,
       type: input.type ?? PropertyType.APARTAMENTO,
       status: input.status ?? PropertyStatus.DISPONIVEL,

@@ -1,25 +1,26 @@
-import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
-import { optimizeRoute, RouteStopInput } from "@/lib/google-maps";
+import { optimizeRoute, type RouteStopInput } from "@/lib/google-maps";
+import { jsonError, readJsonBody } from "@/lib/http";
 
-export async function POST(req: NextRequest) {
+export async function POST(req: Request) {
   const session = await auth();
-  if (!session) {
-    return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
+  if (!session?.user?.id) {
+    return jsonError("Não autenticado", 401);
   }
 
-  const body = await req.json();
-  const stops: RouteStopInput[] = body.stops;
+  const body = await readJsonBody<{ stops?: RouteStopInput[] }>(req);
+  if (!body.ok) return body.response;
 
+  const stops = body.data.stops;
   if (!Array.isArray(stops) || stops.length === 0) {
-    return NextResponse.json({ error: "Envie ao menos uma parada em 'stops'" }, { status: 400 });
+    return jsonError("Envie ao menos uma parada em 'stops'", 400);
   }
 
   try {
     const result = await optimizeRoute(stops);
-    return NextResponse.json(result);
+    return Response.json(result);
   } catch (err) {
-    console.error("Erro ao otimizar rota:", err);
-    return NextResponse.json({ error: "Falha ao calcular a rota" }, { status: 500 });
+    console.error("[routes/optimize]", err);
+    return jsonError("Falha ao calcular a rota", 500);
   }
 }

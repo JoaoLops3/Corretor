@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { listVisits, listPropertiesForSelect } from "@/lib/actions/visits";
+import { listVisits } from "@/lib/actions/visits";
 import { visitStatusLabels } from "@/lib/types";
 import { CalendarioClient } from "@/components/calendar/calendario-client";
 
@@ -11,7 +11,6 @@ async function CalendarioData({
   const sp = await searchParams;
   const day = sp.day ? new Date(sp.day + "T12:00:00") : new Date();
   const visits = await listVisits({ day });
-  const properties = await listPropertiesForSelect();
 
   const mapped = visits.map((v) => ({
     id: v.id,
@@ -42,26 +41,10 @@ async function CalendarioData({
       duration: v.duration,
     }));
 
-  const routeStops =
-    stops.length > 0
-      ? stops
-      : properties
-          .filter((p) => p.lat != null && p.lng != null)
-          .slice(0, 5)
-          .map((p) => ({
-            id: p.id,
-            label: p.title,
-            address: `${p.addressStreet} — ${p.addressDistrict}`,
-            lat: p.lat as number,
-            lng: p.lng as number,
-            time: "--:--",
-            duration: "30min",
-          }));
-
   return (
     <CalendarioClient
       initialVisits={mapped}
-      routeStops={routeStops}
+      routeStops={stops}
       openNew={sp.novo === "1"}
       initialDay={day.toISOString().slice(0, 10)}
     />

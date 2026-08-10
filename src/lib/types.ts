@@ -20,7 +20,7 @@ export type {
   ProposalStatus,
 };
 
-export type LeadColumn = "NOVO" | "EM_VISITA" | "PROPOSTA" | "FECHADO";
+export type LeadColumn = "NOVO" | "EM_VISITA" | "PROPOSTA" | "FECHADO" | "PERDIDO";
 
 export const roleLabels: Record<Role, string> = {
   ADMIN: "Admin",
@@ -55,6 +55,7 @@ export const leadColumnLabels: Record<LeadColumn, string> = {
   EM_VISITA: "Em visita",
   PROPOSTA: "Proposta",
   FECHADO: "Fechado",
+  PERDIDO: "Perdido",
 };
 
 export const proposalStatusLabels: Record<ProposalStatus, string> = {

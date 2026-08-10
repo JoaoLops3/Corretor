@@ -4,7 +4,11 @@ import { formatBRL } from "@/lib/types";
 import { toNumberOrNull } from "@/lib/serialize";
 import { CrmClient } from "@/components/crm/crm-client";
 
-async function CrmData({ searchParams }: { searchParams: Promise<{ novo?: string }> }) {
+async function CrmData({
+  searchParams,
+}: {
+  searchParams: Promise<{ novo?: string; lead?: string }>;
+}) {
   const sp = await searchParams;
   const leads = await listLeads();
   const mapped = leads.map((l) => {
@@ -25,13 +29,19 @@ async function CrmData({ searchParams }: { searchParams: Promise<{ novo?: string
       propertyId: l.propertyId,
     };
   });
-  return <CrmClient initialLeads={mapped} openNew={sp.novo === "1"} />;
+  return (
+    <CrmClient
+      initialLeads={mapped}
+      openNew={sp.novo === "1"}
+      initialLeadId={sp.lead ?? null}
+    />
+  );
 }
 
 export default function CrmPage({
   searchParams,
 }: {
-  searchParams: Promise<{ novo?: string }>;
+  searchParams: Promise<{ novo?: string; lead?: string }>;
 }) {
   return (
     <Suspense fallback={<div className="p-6 text-text-mut">Carregando CRM…</div>}>

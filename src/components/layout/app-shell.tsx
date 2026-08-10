@@ -157,7 +157,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                         onClick={() => {
                           setQuery("");
                           setResults(null);
-                          router.push("/imoveis");
+                          router.push(`/imoveis?q=${encodeURIComponent(p.code)}`);
                         }}
                       >
                         <span className="font-mono text-[11px] text-text-mut">#{p.code}</span> {p.title}
@@ -170,7 +170,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                         onClick={() => {
                           setQuery("");
                           setResults(null);
-                          router.push("/crm");
+                          router.push(`/crm?lead=${encodeURIComponent(l.id)}`);
                         }}
                       >
                         {l.name} <span className="font-mono text-[11px] text-text-mut">{l.phone}</span>
