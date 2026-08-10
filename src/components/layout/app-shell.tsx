@@ -67,6 +67,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     }
   }
 
+  if (status !== "authenticated" || !user) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-paper text-sm text-text-mut">
+        Verificando sessão…
+      </div>
+    );
+  }
+
   return (
     <div className="mx-auto flex min-h-screen max-w-[1400px]">
       <aside className="sticky top-0 hidden h-screen w-60 flex-shrink-0 flex-col gap-1 bg-ink p-5.5 text-white md:flex">

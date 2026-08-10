@@ -2,11 +2,9 @@
 
 import { SessionProvider } from "next-auth/react";
 
-const REFETCH_SECONDS = 10;
-
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   return (
-    <SessionProvider refetchInterval={REFETCH_SECONDS} refetchOnWindowFocus>
+    <SessionProvider refetchInterval={3} refetchOnWindowFocus>
       {children}
     </SessionProvider>
   );
