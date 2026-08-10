@@ -3,7 +3,6 @@
 import { useRouter } from "next/navigation";
 import { Modal, ModalTitle, ModalActions } from "@/components/ui/modal";
 import { Button, Avatar } from "@/components/ui/primitives";
-import { useToast } from "@/components/providers/toast-provider";
 import type { TeamMemberView } from "@/components/team/equipe-client";
 
 export function TeamProfileModal({
@@ -16,7 +15,6 @@ export function TeamProfileModal({
   currentUserId: string;
 }) {
   const router = useRouter();
-  const showToast = useToast();
 
   return (
     <Modal open={!!member} onClose={onClose}>
@@ -57,13 +55,6 @@ export function TeamProfileModal({
           </div>
 
           <ModalActions>
-            <Button
-              variant="ghost"
-              onClick={() => showToast("Mensagem direta chega na Fase 5")}
-              disabled
-            >
-              💬 Mensagem
-            </Button>
             <Button
               onClick={() => {
                 router.push(`/imoveis?broker=${member.id}`);

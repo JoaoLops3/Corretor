@@ -83,10 +83,8 @@ export function CalendarioClient({
     <section className="animate-fade-in">
       <div className="mb-3.5 flex flex-wrap items-baseline justify-between gap-2.5">
         <div>
-          <span className="mb-1 block font-mono text-[11px] uppercase tracking-wider text-cyan capitalize">
-            {monthLabel}
-          </span>
-          <h1 className="text-[21px] font-bold">Calendário</h1>
+          <span className="page-kicker capitalize">{monthLabel}</span>
+          <h1 className="page-title">Calendário</h1>
         </div>
         <Button onClick={() => setNewOpen(true)}>Novo compromisso</Button>
       </div>
@@ -98,8 +96,8 @@ export function CalendarioClient({
             <button
               key={d.iso}
               onClick={() => selectDay(d.iso)}
-              className={`w-13 flex-shrink-0 rounded-[10px] border py-2.5 text-center transition-colors ${
-                active ? "border-ink bg-ink text-white" : "border-line bg-paper-2 hover:border-cyan"
+              className={`w-13 flex-shrink-0 rounded-[10px] border py-2.5 text-center transition-colors duration-150 ${
+                active ? "border-ink bg-ink text-white shadow-[var(--shadow-sm-brand)]" : "border-line bg-paper-2 hover:border-cyan"
               }`}
             >
               <div className="text-[10px] uppercase opacity-70">{d.dow}</div>
@@ -121,9 +119,7 @@ export function CalendarioClient({
       {tab === "agenda" ? (
         <div>
           {initialVisits.length === 0 ? (
-            <div className="rounded-[14px] border border-dashed border-line py-10 text-center text-text-mut">
-              Nenhuma visita neste dia
-            </div>
+            <div className="empty-panel py-10">Nenhuma visita neste dia</div>
           ) : (
             initialVisits.map((c) => (
               <div

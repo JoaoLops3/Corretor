@@ -230,8 +230,8 @@ export function CrmClient({
     <section className="animate-fade-in">
       <div className="mb-3.5 flex flex-wrap items-baseline justify-between gap-2.5">
         <div>
-          <span className="mb-1 block font-mono text-[11px] uppercase tracking-wider text-cyan">{total} leads ativos</span>
-          <h1 className="text-[21px] font-bold">CRM / Leads</h1>
+          <span className="page-kicker">{total} leads ativos</span>
+          <h1 className="page-title">CRM / Leads</h1>
         </div>
         <Button onClick={() => setNewOpen(true)}>Novo lead</Button>
       </div>

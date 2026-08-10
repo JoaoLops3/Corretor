@@ -44,10 +44,8 @@ export function PropostasClient({ initialProposals }: { initialProposals: Propos
     <section className="animate-fade-in">
       <div className="mb-3.5 flex flex-wrap items-baseline justify-between gap-2.5">
         <div>
-          <span className="mb-1 block font-mono text-[11px] uppercase tracking-wider text-cyan">
-            {initialProposals.length} em andamento
-          </span>
-          <h1 className="text-[21px] font-bold">Propostas / Contratos</h1>
+          <span className="page-kicker">{initialProposals.length} em andamento</span>
+          <h1 className="page-title">Propostas / Contratos</h1>
         </div>
         <Button onClick={() => setNewOpen(true)}>Nova proposta</Button>
       </div>
@@ -56,7 +54,7 @@ export function PropostasClient({ initialProposals }: { initialProposals: Propos
         <button
           key={p.id}
           onClick={() => setSelected(p)}
-          className="mb-2.5 flex w-full flex-col gap-2 rounded-[14px] border border-line bg-paper-2 p-3.5 text-left transition-shadow hover:shadow-[var(--shadow-sm-brand)]"
+            className="mb-2.5 flex w-full flex-col gap-2 rounded-[14px] border border-line bg-paper-2 p-3.5 text-left transition-[box-shadow,border-color] duration-150 hover:border-cyan/35 hover:shadow-[var(--shadow-sm-brand)]"
         >
           <div className="flex items-start justify-between">
             <div>

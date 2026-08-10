@@ -57,13 +57,13 @@ export function Modal({ open, onClose, children, showHandle, maxWidth = "max-w-[
         tabIndex={-1}
         role="dialog"
         aria-modal="true"
-        className={`relative w-full ${maxWidth} max-h-[88vh] overflow-y-auto rounded-t-[20px] bg-paper-2 p-5 shadow-[var(--shadow-lg-brand)] animate-slide-up sm:rounded-[20px]`}
+        className={`relative w-full ${maxWidth} max-h-[88vh] overflow-y-auto rounded-t-[18px] bg-paper-2 p-5 shadow-[var(--shadow-lg-brand)] animate-slide-up sm:rounded-[18px]`}
       >
         {showHandle && <span className="mx-auto mb-3.5 block h-1 w-9 rounded-full bg-line" />}
         <button
           onClick={onClose}
           aria-label="Fechar"
-          className="absolute top-4 right-4 flex h-[30px] w-[30px] items-center justify-center rounded-full border border-line bg-paper text-text-mut hover:bg-cyan-soft"
+          className="absolute top-4 right-4 flex h-[30px] w-[30px] items-center justify-center rounded-[8px] border border-line bg-paper text-text-mut transition-colors hover:bg-cyan-soft hover:text-ink"
         >
           <X size={14} />
         </button>
@@ -74,11 +74,11 @@ export function Modal({ open, onClose, children, showHandle, maxWidth = "max-w-[
 }
 
 export function ModalTitle({ children }: { children: React.ReactNode }) {
-  return <div className="mb-1 pr-10 text-[17px] font-bold">{children}</div>;
+  return <div className="mb-1 pr-10 font-display text-[17px] font-bold text-ink">{children}</div>;
 }
 
 export function ModalSub({ children }: { children: React.ReactNode }) {
-  return <div className="mb-4 text-[12.5px] text-text-mut">{children}</div>;
+  return <div className="mb-4 text-[12.5px] leading-snug text-text-mut">{children}</div>;
 }
 
 export function ModalActions({ children }: { children: React.ReactNode }) {
@@ -94,5 +94,4 @@ export function Field({ label, children }: { label: string; children: React.Reac
   );
 }
 
-export const inputClass =
-  "w-full rounded-[9px] border border-line bg-paper px-3 py-2.5 text-[13.5px] text-text outline-none transition-colors focus:border-cyan focus:bg-white";
+export const inputClass = "field-input py-2.5 text-[13.5px]";

@@ -135,13 +135,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <div className="font-display text-[15px] font-bold">Prancheta</div>
           </div>
           <div className="relative hidden max-w-[380px] flex-1 md:block">
-            <div className="flex items-center gap-2.5 rounded-[10px] border border-line bg-paper-2 px-3.5 py-2.5 text-text-mut">
+            <div className="flex items-center gap-2.5 rounded-[10px] border border-line bg-paper-2 px-3.5 py-2.5 text-text-mut transition-[border-color,box-shadow] duration-150 focus-within:border-cyan focus-within:shadow-[0_0_0_3px_color-mix(in_srgb,var(--color-cyan)_18%,transparent)]">
               <Search size={15} className="flex-shrink-0" />
               <input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Buscar imóvel, cliente ou corretor..."
-                className="flex-1 border-none bg-transparent text-[13px] text-text outline-none"
+                className="flex-1 border-none bg-transparent text-[13px] text-text outline-none placeholder:text-text-mut/70"
               />
             </div>
             {results && (
@@ -185,7 +185,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <button
               aria-label="Notificações"
               onClick={openNotifications}
-              className="relative flex h-9 w-9 items-center justify-center rounded-[10px] border border-line bg-paper-2 hover:bg-cyan-soft"
+              className="relative flex h-9 w-9 items-center justify-center rounded-[10px] border border-line bg-paper-2 transition-colors hover:bg-cyan-soft"
             >
               <Bell size={17} />
               {notifs.length > 0 && (
@@ -195,7 +195,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <Link
               href="/imoveis?novo=1"
               aria-label="Novo imóvel"
-              className="flex h-9 w-9 items-center justify-center rounded-[10px] border border-line bg-paper-2 hover:bg-cyan-soft"
+              className="flex h-9 w-9 items-center justify-center rounded-[10px] border border-line bg-paper-2 transition-colors hover:bg-cyan-soft"
             >
               <Plus size={17} />
             </Link>

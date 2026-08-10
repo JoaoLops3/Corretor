@@ -7,7 +7,7 @@ import { PropertyStatus } from "@prisma/client";
 import { PropertyCard } from "@/components/property/property-card";
 import { PropertyFormModal } from "@/components/property/property-form-modal";
 import { PropertyDetailModal } from "@/components/property/property-detail-modal";
-import { Chip, Button } from "@/components/ui/primitives";
+import { Chip, Button, EmptyState } from "@/components/ui/primitives";
 import type { PropertyView } from "@/lib/property-view";
 
 export function ImoveisClient({
@@ -60,10 +60,8 @@ export function ImoveisClient({
     <section className="animate-fade-in">
       <div className="mb-3.5 flex flex-wrap items-baseline justify-between gap-2.5">
         <div>
-          <span className="mb-1 block font-mono text-[11px] uppercase tracking-wider text-cyan">
-            {subtitle}
-          </span>
-          <h1 className="text-[21px] font-bold">Imóveis</h1>
+          <span className="page-kicker">{subtitle}</span>
+          <h1 className="page-title">Imóveis</h1>
         </div>
         <Button
           onClick={() => {
@@ -90,7 +88,7 @@ export function ImoveisClient({
         value={search}
         onChange={(e) => setSearch(e.target.value)}
         placeholder="Buscar por título..."
-        className="mb-3.5 w-full rounded-[10px] border border-line bg-paper-2 px-3.5 py-2.5 text-[13px] outline-none focus:border-cyan md:hidden"
+        className="field-input mb-3.5 md:hidden"
       />
 
       <div className="mb-3.5 flex flex-wrap gap-2">
@@ -102,12 +100,11 @@ export function ImoveisClient({
       </div>
 
       {filtered.length === 0 ? (
-        <div className="flex flex-col items-center rounded-[14px] border border-dashed border-line py-10 text-center text-text-mut">
-          <div className="mb-2 text-3xl">🔍</div>
-          <div className="mb-1 font-semibold text-text">Nenhum imóvel encontrado</div>
-          <div className="mb-3.5 text-[12.5px]">Tente outro filtro ou cadastre um novo imóvel.</div>
-          <Button onClick={() => setFormOpen(true)}>Novo imóvel</Button>
-        </div>
+        <EmptyState
+          title="Nenhum imóvel encontrado"
+          description="Tente outro filtro ou cadastre um novo imóvel."
+          action={<Button onClick={() => setFormOpen(true)}>Novo imóvel</Button>}
+        />
       ) : (
         <div className="grid grid-cols-1 gap-3.5 md:grid-cols-2 xl:grid-cols-3">
           {filtered.map((p) => (

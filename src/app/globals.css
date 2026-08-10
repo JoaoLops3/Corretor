@@ -20,28 +20,55 @@
   --color-stamp-soft: #F5E1DC;
 
   --font-display: "Archivo", sans-serif;
-  --font-sans: "Inter", sans-serif;
+  --font-sans: "IBM Plex Sans", sans-serif;
   --font-mono: "IBM Plex Mono", monospace;
 
-  --shadow-sm-brand: 0 1px 2px rgba(22,50,79,0.06), 0 1px 1px rgba(22,50,79,0.04);
-  --shadow-md-brand: 0 6px 20px rgba(22,50,79,0.10);
-  --shadow-lg-brand: 0 20px 50px rgba(22,50,79,0.22);
+  --shadow-sm-brand: 0 1px 2px rgba(22, 50, 79, 0.06), 0 1px 1px rgba(22, 50, 79, 0.04);
+  --shadow-md-brand: 0 8px 24px rgba(22, 50, 79, 0.1);
+  --shadow-lg-brand: 0 18px 44px rgba(22, 50, 79, 0.18);
 }
 
 @layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
   body {
-    background: var(--color-paper);
+    background-color: var(--color-paper);
+    background-image:
+      radial-gradient(1200px 500px at 50% -10%, rgba(185, 139, 42, 0.09), transparent 55%),
+      radial-gradient(900px 420px at 100% 0%, rgba(44, 110, 155, 0.06), transparent 50%);
     color: var(--color-text);
     font-family: var(--font-sans);
+    font-feature-settings: "ss01" on, "kern" on;
     -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
   }
+
+  ::selection {
+    background: color-mix(in srgb, var(--color-brass) 35%, white);
+    color: var(--color-ink);
+  }
+
+  h1,
+  h2,
+  .font-display {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
+  }
+
   :focus-visible {
-    outline: 2.5px solid var(--color-cyan);
+    outline: 2px solid var(--color-cyan);
     outline-offset: 2px;
-    border-radius: 4px;
   }
+
   @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
       animation-duration: 0.01ms !important;
       animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
@@ -51,28 +78,151 @@
 
 @layer components {
   .stamp {
-    display: inline-flex; align-items: center; gap: 6px;
-    font-family: var(--font-display); font-weight: 800;
-    font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase;
-    padding: 4px 10px 5px; border: 2px solid currentColor; border-radius: 5px;
-    transform: rotate(-3deg); background: #fff; transition: transform .15s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 4px 10px 5px;
+    border: 2px solid currentColor;
+    border-radius: 5px;
+    transform: rotate(-3deg);
+    background: #fff;
+    transition: transform 0.15s ease;
   }
-  .stamp:hover { transform: rotate(-3deg) scale(1.05); }
+  .stamp:hover {
+    transform: rotate(-3deg) scale(1.04);
+  }
 
   .temp-tag {
-    display: inline-flex; align-items: center; gap: 5px; flex-shrink: 0;
-    font-size: 11px; font-weight: 700; padding: 3px 9px 4px; border-radius: 20px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    flex-shrink: 0;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    padding: 3px 8px 4px;
+    border-radius: 6px;
     white-space: nowrap;
   }
   .temp-tag::before {
-    content: ''; width: 7px; height: 7px; border-radius: 50%; background: currentColor; flex-shrink: 0;
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 1px;
+    background: currentColor;
+    flex-shrink: 0;
+    transform: rotate(45deg);
   }
 
-  .animate-fade-in { animation: fadeIn .25s ease; }
-  .animate-slide-up { animation: slideUp .25s ease; }
-  .animate-toast-in { animation: toastIn .25s ease; }
+  .page-kicker {
+    display: block;
+    margin-bottom: 0.25rem;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-cyan);
+  }
+
+  .page-title {
+    font-family: var(--font-display);
+    font-size: 1.35rem;
+    font-weight: 800;
+    line-height: 1.15;
+    color: var(--color-ink);
+    letter-spacing: -0.02em;
+  }
+
+  .field-input {
+    width: 100%;
+    border-radius: 9px;
+    border: 1px solid var(--color-line);
+    background: var(--color-paper);
+    padding: 0.7rem 0.9rem;
+    font-size: 14px;
+    color: var(--color-text);
+    outline: none;
+    transition:
+      border-color 0.15s ease,
+      background-color 0.15s ease,
+      box-shadow 0.15s ease;
+  }
+  .field-input::placeholder {
+    color: color-mix(in srgb, var(--color-text-mut) 70%, transparent);
+  }
+  .field-input:hover {
+    border-color: color-mix(in srgb, var(--color-line) 40%, var(--color-cyan));
+  }
+  .field-input:focus {
+    border-color: var(--color-cyan);
+    background: #fff;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-cyan) 18%, transparent);
+  }
+
+  .empty-panel {
+    border: 1px dashed var(--color-line);
+    border-radius: 14px;
+    background: color-mix(in srgb, var(--color-paper-2) 70%, transparent);
+    padding: 2.25rem 1.25rem;
+    text-align: center;
+    color: var(--color-text-mut);
+  }
+
+  .surface-hover {
+    transition:
+      transform 0.18s ease,
+      box-shadow 0.18s ease,
+      border-color 0.18s ease;
+  }
+  .surface-hover:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md-brand);
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 0.28s ease;
+  }
+  .animate-slide-up {
+    animation: slideUp 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .animate-toast-in {
+    animation: toastIn 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+  }
 }
 
-@keyframes fadeIn { from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
-@keyframes slideUp { from{transform:translateY(30px); opacity:0;} to{transform:translateY(0); opacity:1;} }
-@keyframes toastIn { from{opacity:0; transform:translateY(-10px);} to{opacity:1; transform:translateY(0);} }
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes slideUp {
+  from {
+    transform: translateY(24px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+@keyframes toastIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}

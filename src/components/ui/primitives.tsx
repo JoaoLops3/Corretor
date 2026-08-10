@@ -7,7 +7,7 @@ export function Button({
   ...props
 }: React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: "primary" | "ghost" }) {
   const base =
-    "inline-flex items-center gap-1.5 rounded-[10px] px-4 py-2.5 text-[13px] font-semibold transition-colors active:scale-[0.97] disabled:opacity-60";
+    "inline-flex items-center gap-1.5 rounded-[10px] px-4 py-2.5 text-[13px] font-semibold transition-[background-color,border-color,transform,box-shadow] duration-150 active:scale-[0.97] disabled:opacity-60";
   const styles =
     variant === "primary"
       ? "bg-ink text-white shadow-[var(--shadow-sm-brand)] hover:bg-ink-2"
@@ -89,7 +89,7 @@ export function Avatar({ initials, size = 32 }: { initials: string; size?: numbe
   return (
     <div
       style={{ width: size, height: size, fontSize: size * 0.4 }}
-      className="flex flex-shrink-0 items-center justify-center rounded-full bg-brass-soft font-bold text-ink"
+      className="flex flex-shrink-0 -rotate-3 items-center justify-center rounded-[8px] bg-brass-soft font-display font-bold text-ink"
     >
       {initials}
     </div>
@@ -108,8 +108,10 @@ export function Chip({
   return (
     <button
       onClick={onClick}
-      className={`rounded-full border px-3.5 py-1.5 text-xs font-semibold transition-colors ${
-        active ? "border-ink bg-ink text-white" : "border-line bg-paper-2 text-text-mut hover:border-cyan"
+      className={`rounded-[8px] border px-3 py-1.5 text-xs font-semibold transition-[background-color,border-color,color] duration-150 ${
+        active
+          ? "border-ink bg-ink text-white"
+          : "border-line bg-paper-2 text-text-mut hover:border-cyan hover:text-ink"
       }`}
     >
       {children}
@@ -132,13 +134,31 @@ export function SegToggle({
         <button
           key={opt.value}
           onClick={() => onChange(opt.value)}
-          className={`rounded-[8px] px-3.5 py-1.5 text-[12.5px] font-semibold transition-colors ${
-            value === opt.value ? "bg-ink text-white" : "text-text-mut"
+          className={`rounded-[8px] px-3.5 py-1.5 text-[12.5px] font-semibold transition-colors duration-150 ${
+            value === opt.value ? "bg-ink text-white shadow-[var(--shadow-sm-brand)]" : "text-text-mut hover:text-ink"
           }`}
         >
           {opt.label}
         </button>
       ))}
+    </div>
+  );
+}
+
+export function EmptyState({
+  title,
+  description,
+  action,
+}: {
+  title: string;
+  description?: string;
+  action?: React.ReactNode;
+}) {
+  return (
+    <div className="empty-panel">
+      <div className="mb-1 font-display text-[15px] font-bold text-ink">{title}</div>
+      {description ? <div className="mx-auto max-w-[36ch] text-[12.5px] leading-relaxed">{description}</div> : null}
+      {action ? <div className="mt-4 flex justify-center">{action}</div> : null}
     </div>
   );
 }

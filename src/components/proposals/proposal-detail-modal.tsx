@@ -2,7 +2,6 @@
 
 import { Modal, ModalTitle, ModalSub, ModalActions } from "@/components/ui/modal";
 import { Button } from "@/components/ui/primitives";
-import { useToast } from "@/components/providers/toast-provider";
 import type { ProposalView } from "@/components/proposals/propostas-client";
 
 const steps = ["Proposta", "Aprovação", "Documentação", "Assinatura"];
@@ -16,7 +15,6 @@ export function ProposalDetailModal({
   onClose: () => void;
   onAdvance: (id: string) => void;
 }) {
-  const showToast = useToast();
   return (
     <Modal open={!!proposal} onClose={onClose}>
       {proposal && (
@@ -36,14 +34,6 @@ export function ProposalDetailModal({
             <div className="h-full bg-cyan transition-all" style={{ width: `${(proposal.step + 1) * 25}%` }} />
           </div>
           <ModalActions>
-            <Button
-              variant="ghost"
-              onClick={() => showToast("Cobrança Pix disponível na Fase 5 — em breve")}
-              disabled
-              title="Em breve"
-            >
-              💰 Cobrar comissão
-            </Button>
             <Button onClick={() => onAdvance(proposal.id)}>Avançar etapa</Button>
           </ModalActions>
         </>

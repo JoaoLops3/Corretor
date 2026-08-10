@@ -35,9 +35,10 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
         {toasts.map((t) => (
           <div
             key={t.id}
-            className="animate-toast-in flex items-center gap-2 rounded-[10px] bg-ink px-4.5 py-2.5 text-sm font-semibold text-white shadow-[var(--shadow-lg-brand)]"
+            className="animate-toast-in flex items-stretch overflow-hidden rounded-[10px] bg-ink shadow-[var(--shadow-lg-brand)]"
           >
-            {t.message}
+            <span aria-hidden className="w-1 shrink-0 bg-brass" />
+            <div className="px-4 py-2.5 text-sm font-semibold text-white">{t.message}</div>
           </div>
         ))}
       </div>
