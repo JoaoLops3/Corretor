@@ -1,7 +1,7 @@
 import { auth } from "@/lib/auth";
 import { NextResponse } from "next/server";
 
-function withNoStore(res: NextResponse) {
+function noStore(res: NextResponse) {
   res.headers.set("Cache-Control", "private, no-store, max-age=0, must-revalidate");
   return res;
 }
@@ -16,26 +16,23 @@ export default auth((req) => {
   if (!isLoggedIn && !isLoginPage) {
     const loginUrl = new URL("/login", req.nextUrl.origin);
     loginUrl.searchParams.set("callbackUrl", path);
-    return withNoStore(NextResponse.redirect(loginUrl));
+    return noStore(NextResponse.redirect(loginUrl));
   }
 
-  if (isLoggedIn && isLoginPage) {
-    if (req.nextUrl.searchParams.get("reason") !== "expired") {
-      return withNoStore(NextResponse.redirect(new URL("/", req.nextUrl.origin)));
-    }
+  if (isLoggedIn && isLoginPage && req.nextUrl.searchParams.get("reason") !== "expired") {
+    return noStore(NextResponse.redirect(new URL("/", req.nextUrl.origin)));
   }
 
-  // Equipe só para gerente/admin
   if (
     isLoggedIn &&
     path.startsWith("/equipe") &&
     role !== "ADMIN" &&
     role !== "GERENTE"
   ) {
-    return withNoStore(NextResponse.redirect(new URL("/", req.nextUrl.origin)));
+    return noStore(NextResponse.redirect(new URL("/", req.nextUrl.origin)));
   }
 
-  return withNoStore(NextResponse.next());
+  return noStore(NextResponse.next());
 });
 
 export const config = {

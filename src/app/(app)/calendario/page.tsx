@@ -42,7 +42,6 @@ async function CalendarioData({
       duration: v.duration,
     }));
 
-  // fallback stops from properties with coords if no visits have coords
   const routeStops =
     stops.length > 0
       ? stops

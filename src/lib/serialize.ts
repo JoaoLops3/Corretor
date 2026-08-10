@@ -1,4 +1,4 @@
-/** Converte Prisma.Decimal (e afins) em number plain para atravessar Server → Client. */
+/** Prisma.Decimal → number plain (Server → Client). */
 export function toNumber(
   value: number | string | { toString(): string } | null | undefined,
 ): number {

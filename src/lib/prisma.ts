@@ -28,7 +28,7 @@ function getClient(): PrismaClient {
   return client;
 }
 
-/** Lazy: não exige DATABASE_URL no import (build/coleta de rotas na Vercel). */
+/** Proxy lazy: `prisma generate` / build na Vercel não exigem DATABASE_URL no import. */
 export const prisma = new Proxy({} as PrismaClient, {
   get(_target, prop, receiver) {
     const client = getClient();

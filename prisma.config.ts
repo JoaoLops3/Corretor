@@ -1,8 +1,7 @@
 import "dotenv/config";
 import { defineConfig } from "prisma/config";
 
-// Não usar env("DATABASE_URL"): ele quebra `prisma generate` no CI/Vercel
-// quando a variável ainda não existe. generate não precisa de URL real.
+// process.env (não env()): `prisma generate` no CI não exige DATABASE_URL.
 export default defineConfig({
   schema: "prisma/schema.prisma",
   migrations: {

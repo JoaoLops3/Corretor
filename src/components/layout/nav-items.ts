@@ -14,7 +14,6 @@ export type NavItem = {
   label: string;
   tabLabel: string;
   icon: LucideIcon;
-  /** Se definido, só essas roles veem o item. Sem = todos. */
   roles?: Role[];
 };
 

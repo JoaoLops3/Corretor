@@ -2,13 +2,11 @@
 
 import { SessionProvider } from "next-auth/react";
 
+const REFETCH_SECONDS = 10;
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   return (
-    <SessionProvider
-      // Sem polling, o React mantém "authenticated" em memória depois que o cookie some
-      refetchInterval={10}
-      refetchOnWindowFocus
-    >
+    <SessionProvider refetchInterval={REFETCH_SECONDS} refetchOnWindowFocus>
       {children}
     </SessionProvider>
   );

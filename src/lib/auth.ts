@@ -46,9 +46,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   },
   session: {
     strategy: "jwt",
-    // Sem cookie válido, a sessão some; maxAge limita o JWT mesmo se o cookie existir
-    maxAge: 60 * 60 * 8, // 8h
-    updateAge: 60 * 30, // reemite cookie no máximo a cada 30 min
+    maxAge: 60 * 60 * 8,
+    updateAge: 60 * 30,
   },
   callbacks: {
     async jwt({ token, user }) {
@@ -65,33 +64,30 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
       const userId = (token.id as string | undefined) || (token.sub as string | undefined);
       const refreshedAt = (token.refreshedAt as number | undefined) ?? 0;
-      const stale = Date.now() - refreshedAt > JWT_REFRESH_MS;
+      if (!userId || Date.now() - refreshedAt <= JWT_REFRESH_MS) return token;
 
-      if (userId && stale) {
-        const dbUser = await prisma.user.findUnique({
-          where: { id: userId },
-          include: { team: true },
-        });
-        if (!dbUser || !dbUser.active) {
-          token.active = false;
-          return token;
-        }
-        token.id = dbUser.id;
-        token.role = dbUser.role;
-        token.teamId = dbUser.teamId;
-        token.teamName = dbUser.team?.name ?? null;
-        token.initials = initialsFromName(dbUser.name);
-        token.name = dbUser.name;
-        token.email = dbUser.email;
-        token.active = true;
-        token.refreshedAt = Date.now();
+      const dbUser = await prisma.user.findUnique({
+        where: { id: userId },
+        include: { team: true },
+      });
+      if (!dbUser || !dbUser.active) {
+        token.active = false;
+        return token;
       }
 
+      token.id = dbUser.id;
+      token.role = dbUser.role;
+      token.teamId = dbUser.teamId;
+      token.teamName = dbUser.team?.name ?? null;
+      token.initials = initialsFromName(dbUser.name);
+      token.name = dbUser.name;
+      token.email = dbUser.email;
+      token.active = true;
+      token.refreshedAt = Date.now();
       return token;
     },
     session({ session, token }) {
       if (token.active === false) {
-        // Sessão inválida — client/proxy devem mandar para login
         session.user = undefined as unknown as typeof session.user;
         return session;
       }

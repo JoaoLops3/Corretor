@@ -25,12 +25,9 @@ async function main() {
   await prisma.user.deleteMany();
   await prisma.team.deleteMany();
 
-  // Senha gerada na hora — não fica no repositório; só aparece no terminal
+  // Senha aleatória — impressa no terminal ao final do seed
   const password = randomBytes(9).toString("base64url");
-  const passwordHash = await bcrypt.hash(password, 10);
-
-
-  const team = await prisma.team.create({
+  const passwordHash = await bcrypt.hash(password, 10);  const team = await prisma.team.create({
     data: { name: "Imobiliária Horizonte" },
   });
 

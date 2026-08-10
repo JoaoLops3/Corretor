@@ -16,10 +16,7 @@ function apiKeyOk(provided: string | null): boolean {
   }
 }
 
-/**
- * Webhook para o n8n registrar automações (lembretes WhatsApp etc).
- * Auth: header `x-api-key` == N8N_API_KEY
- */
+/** n8n → header `x-api-key` == N8N_API_KEY */
 export async function POST(req: Request) {
   if (!process.env.N8N_API_KEY) {
     return NextResponse.json(

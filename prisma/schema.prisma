@@ -9,9 +9,9 @@ datasource db {
 // ==================== AUTH / EQUIPE ====================
 
 enum Role {
-  ADMIN     // dono da imobiliária, acesso total
-  GERENTE   // gerencia um time, vê tudo do time
-  CORRETOR  // vê e edita só o que é dele (imóveis, leads, visitas)
+  ADMIN     // dono — acesso total
+  GERENTE   // vê e gerencia o time
+  CORRETOR  // só a própria carteira
 }
 
 model Team {
@@ -29,7 +29,7 @@ model User {
   email        String   @unique
   passwordHash String
   role         Role     @default(CORRETOR)
-  creci        String?  // registro do corretor
+  creci        String?
   phone        String?
   avatarUrl    String?
   active       Boolean  @default(true)
@@ -75,14 +75,14 @@ enum PropertyStatus {
 }
 
 enum PropertyTemperature {
-  QUENTE // muito interesse / gira rápido
+  QUENTE
   MORNO
-  FRIO   // parado há tempo, precisa de ação (baixar preço, remarketing etc)
+  FRIO
 }
 
 model Property {
   id          String         @id @default(cuid())
-  code        String         @unique // ex: IM-0231
+  code        String         @unique
   title       String
   description String?
   type        PropertyType
@@ -90,7 +90,7 @@ model Property {
   temperature PropertyTemperature @default(MORNO)
 
   price        Decimal
-  area         Decimal        // m²
+  area         Decimal
   bedrooms     Int?
   bathrooms    Int?
   parkingSpots Int?
@@ -150,17 +150,16 @@ enum LeadTemperature {
 model Lead {
   id    String @id @default(cuid())
   name  String
-  phone String // usado pelo n8n pra mandar mensagem no zap
+  phone String
   email String?
 
-  interest String? // texto livre: "apto 2-3qts zona sul"
+  interest String?
   budgetMin Decimal?
   budgetMax Decimal?
 
   status      LeadStatus      @default(NOVO)
   temperature LeadTemperature @default(MORNO)
 
-  // usados pelas automações do n8n
   lastContactAt   DateTime?
   nextReminderAt  DateTime?
 
@@ -199,7 +198,7 @@ model Visit {
   status        VisitStatus @default(AGENDADA)
   notes         String?
 
-  reminderSentAt DateTime? // preenchido pelo n8n quando manda o lembrete
+  reminderSentAt DateTime?
 
   createdAt DateTime @default(now())
 
@@ -219,11 +218,10 @@ model Visit {
 }
 
 // ==================== ROTEIRO DE VISITAS ====================
-// Agrupa as visitas de um corretor num dia numa ordem otimizada (sequência de paradas)
 
 model VisitRoute {
   id        String   @id @default(cuid())
-  date      DateTime // dia do roteiro (só a data importa)
+  date      DateTime
   brokerId  String
   createdAt DateTime @default(now())
 
@@ -234,7 +232,7 @@ model VisitRoute {
 
 model RouteStop {
   id      String @id @default(cuid())
-  order   Int    // posição na sequência do roteiro (1, 2, 3...)
+  order   Int
 
   routeId String
   route   VisitRoute @relation(fields: [routeId], references: [id], onDelete: Cascade)
@@ -300,7 +298,6 @@ enum AutomationType {
   TRIAGEM_LEAD
 }
 
-// registro de tudo que o n8n disparou, pra auditoria e pra não duplicar envio
 model AutomationLog {
   id        String         @id @default(cuid())
   type      AutomationType

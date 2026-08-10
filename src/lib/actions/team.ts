@@ -38,7 +38,6 @@ export async function inviteTeamMember(input: {
   });
   if (existing) throw new Error("E-mail já cadastrado");
 
-  // Senha temporária aleatória — conta fica inactive até ativação
   const tempPassword = randomBytes(18).toString("base64url");
   const passwordHash = await bcrypt.hash(tempPassword, 10);
   const user = await prisma.user.create({
@@ -53,6 +52,5 @@ export async function inviteTeamMember(input: {
   });
 
   revalidatePath("/equipe");
-  // Não devolve a senha ao client
   return { id: user.id, email: user.email, active: user.active };
 }

@@ -1,5 +1,5 @@
-import type { Prisma, Role } from "@prisma/client";
 import type { Session } from "next-auth";
+import type { Role } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 
 export function isManager(session: Session): boolean {
@@ -7,7 +7,6 @@ export function isManager(session: Session): boolean {
   return role === "ADMIN" || role === "GERENTE";
 }
 
-/** Fail-closed: gerente sem time não vê nada de ninguém. */
 export function requireUserId(session: Session): string {
   const id = session.user?.id;
   if (!id) throw new Error("Não autenticado");
@@ -21,10 +20,7 @@ export function requireManagerTeamId(session: Session): string {
   return teamId;
 }
 
-/**
- * Filtro para Lead / Visit / Proposal (relação broker → team).
- * Corretor: só o dele. Gerente: só o time.
- */
+/** Lead / Visit / Proposal: corretor = próprio; gerente = time. */
 export function brokerOwnedWhere(
   session: Session,
 ): { brokerId: string } | { broker: { teamId: string } } {
@@ -35,10 +31,7 @@ export function brokerOwnedWhere(
   return { brokerId: userId };
 }
 
-/**
- * Filtro para Property (tem teamId direto).
- * Para listagens de time inteiro (selects, busca).
- */
+/** Property: corretor = próprio; gerente = teamId. */
 export function propertyScopeWhere(
   session: Session,
 ): { brokerId: string } | { teamId: string } {
@@ -49,7 +42,6 @@ export function propertyScopeWhere(
   return { brokerId: userId };
 }
 
-/** Corretor só acessa o próprio; gerente só se o alvo for do mesmo time. */
 export async function canAccessBrokerData(
   session: Session,
   brokerId: string,
@@ -78,7 +70,6 @@ export async function assertCanAccessBroker(
   }
 }
 
-/** Garante que property/lead existem e estão no escopo do usuário. */
 export async function assertCanAccessProperty(
   session: Session,
   propertyId: string,
@@ -101,12 +92,3 @@ export async function assertCanAccessLead(session: Session, leadId: string) {
   await assertCanAccessBroker(session, lead.brokerId);
   return lead;
 }
-
-export type BrokerOwnedWhere = ReturnType<typeof brokerOwnedWhere>;
-export type PropertyScopeWhere = ReturnType<typeof propertyScopeWhere>;
-
-// tipagem auxiliar para spreads Prisma
-export type LeadWhere = Prisma.LeadWhereInput;
-export type VisitWhere = Prisma.VisitWhereInput;
-export type ProposalWhere = Prisma.ProposalWhereInput;
-export type PropertyWhere = Prisma.PropertyWhereInput;

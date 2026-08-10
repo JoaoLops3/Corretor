@@ -18,9 +18,7 @@ export async function getDashboardData() {
   const todayEnd = new Date();
   todayEnd.setHours(23, 59, 59, 999);
 
-  // "Meus imóveis" = carteira do corretor logado (bate com /imoveis).
-  // Demais cards do gerente usam o time inteiro.
-  const propertyWhere = {
+  const myPortfolioWhere = {
     brokerId: userId,
     status: {
       in: [
@@ -37,7 +35,7 @@ export async function getDashboardData() {
 
   const [myProperties, visitsToday, openLeads, hotLeads, proposalAgg, upcomingVisits] =
     await Promise.all([
-      prisma.property.count({ where: propertyWhere }),
+      prisma.property.count({ where: myPortfolioWhere }),
       prisma.visit.count({
         where: {
           ...teamFilter,
@@ -142,14 +140,13 @@ export async function searchGlobal(q: string) {
   const query = q.trim();
   if (!query) return { properties: [], leads: [] };
 
-  const propertyScope = isManager(session)
-    ? { teamId: session.user.teamId! }
-    : { brokerId: session.user.id! };
-  // fail-closed se gerente sem time
   if (isManager(session) && !session.user.teamId) {
     return { properties: [], leads: [] };
   }
 
+  const propertyScope = isManager(session)
+    ? { teamId: session.user.teamId! }
+    : { brokerId: session.user.id! };
   const leadScope = brokerOwnedWhere(session);
 
   const [properties, leads] = await Promise.all([

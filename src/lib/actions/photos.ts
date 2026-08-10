@@ -3,6 +3,10 @@
 import { put } from "@vercel/blob";
 import { addPropertyPhoto } from "@/lib/actions/properties";
 
+function placeholderUrl(fileName: string, propertyId: string) {
+  return `https://picsum.photos/seed/${encodeURIComponent(fileName + propertyId)}/800/600`;
+}
+
 export async function uploadPropertyPhoto(formData: FormData) {
   const file = formData.get("file");
   const propertyId = formData.get("propertyId");
@@ -12,9 +16,7 @@ export async function uploadPropertyPhoto(formData: FormData) {
 
   const token = process.env.BLOB_READ_WRITE_TOKEN;
   if (!token) {
-    // Sem Blob: placeholder estável por nome
-    const url = `https://picsum.photos/seed/${encodeURIComponent(file.name + propertyId)}/800/600`;
-    return addPropertyPhoto(propertyId, url);
+    return addPropertyPhoto(propertyId, placeholderUrl(file.name, propertyId));
   }
 
   const blob = await put(`properties/${propertyId}/${Date.now()}-${file.name}`, file, {

@@ -1,9 +1,8 @@
 import { Pool } from "pg";
 
 /**
- * `pg` trata sslmode=require como alias de verify-full e emite warning.
- * Com uselibpqcompat=true, require = criptografia sem verificar CA
- * (o que Prisma Postgres / Neon tipicamente precisam).
+ * `pg` trata sslmode=require como verify-full e emite warning.
+ * uselibpqcompat=true restaura o sentido libpq (criptografa sem verificar CA).
  */
 export function normalizeDatabaseUrl(connectionString: string): string {
   try {
@@ -31,7 +30,6 @@ export function createPgPool(connectionString: string): Pool {
 
   return new Pool({
     connectionString: normalized,
-    // Mantém o comportamento atual do projeto com hosts gerenciados
     ssl: wantsSsl ? { rejectUnauthorized: false } : undefined,
   });
 }

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { useSession, signOut } from "next-auth/react";
+import { signOut } from "next-auth/react";
 import { Bell, Plus, Search, LogOut, X } from "lucide-react";
 import { navForRole } from "./nav-items";
 import { Avatar } from "@/components/ui/primitives";
@@ -11,20 +11,20 @@ import { useToast } from "@/components/providers/toast-provider";
 import { FabMenu } from "./fab-menu";
 import { listUpcomingVisitNotifications, searchGlobal } from "@/lib/actions/dashboard";
 import { roleLabels } from "@/lib/types";
+import { useRequireClientSession } from "@/hooks/use-require-client-session";
 import type { Role } from "@prisma/client";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const showToast = useToast();
-  const { data: session, status } = useSession();
+  const { data: session, status } = useRequireClientSession();
   const user = session?.user;
   const sessionReady = status === "authenticated" && !!user;
   const roleLabel = user?.role ? roleLabels[user.role as Role] : "";
   const teamName = user?.teamName || "Imobiliária";
   const items = navForRole(user?.role as Role | undefined);
-  // Mobile: prioriza Início, Imóveis, Agenda, CRM, Propostas (Equipe só no sidebar)
-  const tabItems = items.filter((i) => i.href !== "/equipe").slice(0, 5);
+  const mobileTabs = items.filter((i) => i.href !== "/equipe").slice(0, 5);
 
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<{
@@ -35,13 +35,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const [notifs, setNotifs] = useState<
     { id: string; title: string; when: string; client: string }[]
   >([]);
-
-  // Cookie apagado / sessão inválida → hard redirect (limpa cache do App Router)
-  useEffect(() => {
-    if (status === "unauthenticated") {
-      window.location.replace("/login");
-    }
-  }, [status]);
 
   useEffect(() => {
     if (!query.trim()) {
@@ -231,7 +224,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </div>
 
       <nav className="fixed inset-x-0 bottom-0 z-30 flex border-t border-line bg-paper-2 px-1 pt-1.5 pb-2 md:hidden">
-        {tabItems.map((item) => {
+        {mobileTabs.map((item) => {
           const active = pathname === item.href;
           const Icon = item.icon;
           return (

@@ -1,7 +1,6 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Desliga auto-geração de arquivos de agent rules no `next dev`
   agentRules: false,
   images: {
     remotePatterns: [

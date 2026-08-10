@@ -1,4 +1,3 @@
-/** Geocoding via Google Maps; sem chave retorna null (cadastro segue sem coords). */
 export async function geocodeAddress(parts: {
   street: string;
   number?: string | null;
