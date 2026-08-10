@@ -1,0 +1,316 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ==================== AUTH / EQUIPE ====================
+
+enum Role {
+  ADMIN     // dono da imobiliária, acesso total
+  GERENTE   // gerencia um time, vê tudo do time
+  CORRETOR  // vê e edita só o que é dele (imóveis, leads, visitas)
+}
+
+model Team {
+  id        String   @id @default(cuid())
+  name      String
+  createdAt DateTime @default(now())
+
+  users      User[]
+  properties Property[]
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         Role     @default(CORRETOR)
+  creci        String?  // registro do corretor
+  phone        String?
+  avatarUrl    String?
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+
+  teamId String?
+  team   Team?   @relation(fields: [teamId], references: [id])
+
+  properties Property[] @relation("BrokerProperties")
+  leads      Lead[]     @relation("BrokerLeads")
+  visits     Visit[]    @relation("BrokerVisits")
+  proposals  Proposal[] @relation("BrokerProposals")
+
+  sessions Session[]
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ==================== IMÓVEIS ====================
+
+enum PropertyType {
+  APARTAMENTO
+  CASA
+  SOBRADO
+  TERRENO
+  SALA_COMERCIAL
+  GALPAO
+  RURAL
+}
+
+enum PropertyStatus {
+  DISPONIVEL
+  RESERVADO
+  VENDIDO
+  ALUGADO
+  INATIVO
+}
+
+enum PropertyTemperature {
+  QUENTE // muito interesse / gira rápido
+  MORNO
+  FRIO   // parado há tempo, precisa de ação (baixar preço, remarketing etc)
+}
+
+model Property {
+  id          String         @id @default(cuid())
+  code        String         @unique // ex: IM-0231
+  title       String
+  description String?
+  type        PropertyType
+  status      PropertyStatus      @default(DISPONIVEL)
+  temperature PropertyTemperature @default(MORNO)
+
+  price        Decimal
+  area         Decimal        // m²
+  bedrooms     Int?
+  bathrooms    Int?
+  parkingSpots Int?
+  suites       Int?
+
+  addressStreet String
+  addressNumber String?
+  addressDistrict String
+  addressCity   String
+  addressState  String
+  addressZip    String?
+  lat           Float?
+  lng           Float?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  brokerId String
+  broker   User   @relation("BrokerProperties", fields: [brokerId], references: [id])
+
+  teamId String?
+  team   Team?   @relation(fields: [teamId], references: [id])
+
+  photos    PropertyPhoto[]
+  leads     Lead[]
+  visits    Visit[]
+  proposals Proposal[]
+
+  @@index([status])
+  @@index([brokerId])
+}
+
+model PropertyPhoto {
+  id         String   @id @default(cuid())
+  url        String
+  order      Int      @default(0)
+  propertyId String
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+}
+
+// ==================== CRM / LEADS ====================
+
+enum LeadStatus {
+  NOVO
+  EM_VISITA
+  PROPOSTA
+  FECHADO
+  PERDIDO
+}
+
+enum LeadTemperature {
+  QUENTE
+  MORNO
+  FRIO
+}
+
+model Lead {
+  id    String @id @default(cuid())
+  name  String
+  phone String // usado pelo n8n pra mandar mensagem no zap
+  email String?
+
+  interest String? // texto livre: "apto 2-3qts zona sul"
+  budgetMin Decimal?
+  budgetMax Decimal?
+
+  status      LeadStatus      @default(NOVO)
+  temperature LeadTemperature @default(MORNO)
+
+  // usados pelas automações do n8n
+  lastContactAt   DateTime?
+  nextReminderAt  DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  brokerId String
+  broker   User   @relation("BrokerLeads", fields: [brokerId], references: [id])
+
+  propertyId String?
+  property   Property? @relation(fields: [propertyId], references: [id])
+
+  visits    Visit[]
+  proposals Proposal[]
+  automationLogs AutomationLog[]
+
+  @@index([status])
+  @@index([nextReminderAt])
+  @@index([brokerId])
+}
+
+// ==================== CALENDÁRIO / VISITAS ====================
+
+enum VisitStatus {
+  AGENDADA
+  CONFIRMADA
+  REALIZADA
+  CANCELADA
+  NAO_COMPARECEU
+}
+
+model Visit {
+  id            String      @id @default(cuid())
+  scheduledAt   DateTime
+  durationMinutes Int       @default(30)
+  status        VisitStatus @default(AGENDADA)
+  notes         String?
+
+  reminderSentAt DateTime? // preenchido pelo n8n quando manda o lembrete
+
+  createdAt DateTime @default(now())
+
+  propertyId String
+  property   Property @relation(fields: [propertyId], references: [id])
+
+  leadId String
+  lead   Lead   @relation(fields: [leadId], references: [id])
+
+  brokerId String
+  broker   User   @relation("BrokerVisits", fields: [brokerId], references: [id])
+
+  routeStop RouteStop?
+
+  @@index([scheduledAt])
+  @@index([brokerId])
+}
+
+// ==================== ROTEIRO DE VISITAS ====================
+// Agrupa as visitas de um corretor num dia numa ordem otimizada (sequência de paradas)
+
+model VisitRoute {
+  id        String   @id @default(cuid())
+  date      DateTime // dia do roteiro (só a data importa)
+  brokerId  String
+  createdAt DateTime @default(now())
+
+  stops RouteStop[]
+
+  @@unique([brokerId, date])
+}
+
+model RouteStop {
+  id      String @id @default(cuid())
+  order   Int    // posição na sequência do roteiro (1, 2, 3...)
+
+  routeId String
+  route   VisitRoute @relation(fields: [routeId], references: [id], onDelete: Cascade)
+
+  visitId String @unique
+  visit   Visit  @relation(fields: [visitId], references: [id])
+
+  estimatedArrival DateTime?
+  distanceFromPrevKm Decimal?
+  travelMinutesFromPrev Int?
+
+  @@index([routeId, order])
+}
+
+// ==================== PROPOSTAS / CONTRATOS ====================
+
+enum ProposalStatus {
+  PROPOSTA
+  APROVACAO
+  DOCUMENTACAO
+  ASSINATURA
+  CONCLUIDA
+  CANCELADA
+}
+
+model Proposal {
+  id     String         @id @default(cuid())
+  value  Decimal
+  status ProposalStatus @default(PROPOSTA)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  propertyId String
+  property   Property @relation(fields: [propertyId], references: [id])
+
+  leadId String
+  lead   Lead   @relation(fields: [leadId], references: [id])
+
+  brokerId String
+  broker   User   @relation("BrokerProposals", fields: [brokerId], references: [id])
+
+  statusHistory ProposalStatusHistory[]
+
+  @@index([brokerId])
+}
+
+model ProposalStatusHistory {
+  id         String         @id @default(cuid())
+  proposalId String
+  proposal   Proposal       @relation(fields: [proposalId], references: [id], onDelete: Cascade)
+  status     ProposalStatus
+  changedAt  DateTime       @default(now())
+  changedBy  String?
+  note       String?
+}
+
+// ==================== INTEGRAÇÃO N8N ====================
+
+enum AutomationType {
+  LEMBRETE_VISITA
+  LEMBRETE_NEGOCIACAO
+  TRIAGEM_LEAD
+}
+
+// registro de tudo que o n8n disparou, pra auditoria e pra não duplicar envio
+model AutomationLog {
+  id        String         @id @default(cuid())
+  type      AutomationType
+  channel   String         @default("whatsapp")
+  success   Boolean        @default(true)
+  payload   Json?
+  sentAt    DateTime       @default(now())
+
+  leadId String?
+  lead   Lead?   @relation(fields: [leadId], references: [id])
+
+  @@index([type, sentAt])
+}

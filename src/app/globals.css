@@ -1,0 +1,78 @@
+@import "tailwindcss";
+
+@theme {
+  --color-ink: #16324F;
+  --color-ink-2: #1D3F63;
+  --color-cyan: #2C6E9B;
+  --color-cyan-soft: #DCEAF3;
+  --color-brass: #B98B2A;
+  --color-brass-soft: #F3E6C8;
+  --color-paper: #F0EEE8;
+  --color-paper-2: #FFFFFF;
+  --color-line: #E1DDD3;
+  --color-text: #1B2430;
+  --color-text-mut: #525C68;
+  --color-ok: #2F7A63;
+  --color-ok-soft: #DEEFE8;
+  --color-amber: #C97F1B;
+  --color-amber-soft: #F6E6D0;
+  --color-stamp: #B1442E;
+  --color-stamp-soft: #F5E1DC;
+
+  --font-display: "Archivo", sans-serif;
+  --font-sans: "Inter", sans-serif;
+  --font-mono: "IBM Plex Mono", monospace;
+
+  --shadow-sm-brand: 0 1px 2px rgba(22,50,79,0.06), 0 1px 1px rgba(22,50,79,0.04);
+  --shadow-md-brand: 0 6px 20px rgba(22,50,79,0.10);
+  --shadow-lg-brand: 0 20px 50px rgba(22,50,79,0.22);
+}
+
+@layer base {
+  body {
+    background: var(--color-paper);
+    color: var(--color-text);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+  :focus-visible {
+    outline: 2.5px solid var(--color-cyan);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer components {
+  .stamp {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-family: var(--font-display); font-weight: 800;
+    font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase;
+    padding: 4px 10px 5px; border: 2px solid currentColor; border-radius: 5px;
+    transform: rotate(-3deg); background: #fff; transition: transform .15s ease;
+  }
+  .stamp:hover { transform: rotate(-3deg) scale(1.05); }
+
+  .temp-tag {
+    display: inline-flex; align-items: center; gap: 5px; flex-shrink: 0;
+    font-size: 11px; font-weight: 700; padding: 3px 9px 4px; border-radius: 20px;
+    white-space: nowrap;
+  }
+  .temp-tag::before {
+    content: ''; width: 7px; height: 7px; border-radius: 50%; background: currentColor; flex-shrink: 0;
+  }
+
+  .animate-fade-in { animation: fadeIn .25s ease; }
+  .animate-slide-up { animation: slideUp .25s ease; }
+  .animate-toast-in { animation: toastIn .25s ease; }
+}
+
+@keyframes fadeIn { from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
+@keyframes slideUp { from{transform:translateY(30px); opacity:0;} to{transform:translateY(0); opacity:1;} }
+@keyframes toastIn { from{opacity:0; transform:translateY(-10px);} to{opacity:1; transform:translateY(0);} }
