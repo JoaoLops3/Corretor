@@ -36,6 +36,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     { id: string; title: string; when: string; client: string }[]
   >([]);
 
+  // Cookie apagado / sessão inválida → hard redirect (limpa cache do App Router)
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      window.location.replace("/login");
+    }
+  }, [status]);
+
   useEffect(() => {
     if (!query.trim()) {
       setResults(null);

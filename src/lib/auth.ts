@@ -44,7 +44,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   pages: {
     signIn: "/login",
   },
-  session: { strategy: "jwt" },
+  session: {
+    strategy: "jwt",
+    // Sem cookie válido, a sessão some; maxAge limita o JWT mesmo se o cookie existir
+    maxAge: 60 * 60 * 8, // 8h
+    updateAge: 60 * 30, // reemite cookie no máximo a cada 30 min
+  },
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
