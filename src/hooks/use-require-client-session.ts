@@ -30,7 +30,10 @@ function goLogin() {
   window.location.replace("/login");
 }
 
-/** Revalida no servidor com cache: no-store. Sem cookie → login. */
+/**
+ * Sessão só vale se o servidor confirmar (cookie HttpOnly).
+ * Eventos: mount, navegação, foco, bfcache. Backup a cada 60s.
+ */
 export function useRequireClientSession() {
   const pathname = usePathname();
   const session = useSession();
@@ -54,16 +57,26 @@ export function useRequireClientSession() {
     }
 
     void verify();
-    const id = window.setInterval(verify, 3000);
+
     const onVisible = () => {
       if (document.visibilityState === "visible") void verify();
     };
+    const onPageShow = (e: PageTransitionEvent) => {
+      if (e.persisted) void verify();
+    };
+    const onFocus = () => void verify();
+
     document.addEventListener("visibilitychange", onVisible);
+    window.addEventListener("pageshow", onPageShow);
+    window.addEventListener("focus", onFocus);
+    const backup = window.setInterval(verify, 60_000);
 
     return () => {
       cancelled = true;
-      window.clearInterval(id);
       document.removeEventListener("visibilitychange", onVisible);
+      window.removeEventListener("pageshow", onPageShow);
+      window.removeEventListener("focus", onFocus);
+      window.clearInterval(backup);
     };
   }, [pathname]);
 

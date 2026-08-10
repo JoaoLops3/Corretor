@@ -17,6 +17,7 @@ declare module "next-auth" {
     teamId?: string | null;
     teamName?: string | null;
     initials?: string;
+    sessionVersion?: number;
   }
 }
 
@@ -27,7 +28,7 @@ declare module "next-auth/jwt" {
     teamId?: string | null;
     teamName?: string | null;
     initials?: string;
-    active?: boolean;
+    sessionVersion?: number;
     refreshedAt?: number;
   }
 }

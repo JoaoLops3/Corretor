@@ -1,5 +1,6 @@
 import { auth } from "@/lib/auth";
 import { NextResponse } from "next/server";
+import { requestHasSessionCookie } from "@/lib/auth-session";
 
 function noStore(res: NextResponse) {
   res.headers.set("Cache-Control", "private, no-store, max-age=0, must-revalidate");
@@ -14,6 +15,11 @@ export default auth((req) => {
   const isLoginPage = path === "/login";
 
   if (!isLoggedIn && !isLoginPage) {
+    if (requestHasSessionCookie(req.cookies)) {
+      return noStore(
+        NextResponse.redirect(new URL("/api/auth/invalidate-session", req.nextUrl.origin)),
+      );
+    }
     const loginUrl = new URL("/login", req.nextUrl.origin);
     loginUrl.searchParams.set("callbackUrl", path);
     return noStore(NextResponse.redirect(loginUrl));

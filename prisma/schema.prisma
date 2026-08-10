@@ -24,16 +24,17 @@ model Team {
 }
 
 model User {
-  id           String   @id @default(cuid())
-  name         String
-  email        String   @unique
-  passwordHash String
-  role         Role     @default(CORRETOR)
-  creci        String?
-  phone        String?
-  avatarUrl    String?
-  active       Boolean  @default(true)
-  createdAt    DateTime @default(now())
+  id             String   @id @default(cuid())
+  name           String
+  email          String   @unique
+  passwordHash   String
+  role           Role     @default(CORRETOR)
+  creci          String?
+  phone          String?
+  avatarUrl      String?
+  active         Boolean  @default(true)
+  sessionVersion Int      @default(0)
+  createdAt      DateTime @default(now())
 
   teamId String?
   team   Team?   @relation(fields: [teamId], references: [id])

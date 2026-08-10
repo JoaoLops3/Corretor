@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { signOut } from "next-auth/react";
 import { Bell, Plus, Search, LogOut, X } from "lucide-react";
 import { navForRole } from "./nav-items";
 import { Avatar } from "@/components/ui/primitives";
@@ -13,6 +12,10 @@ import { listUpcomingVisitNotifications, searchGlobal } from "@/lib/actions/dash
 import { roleLabels } from "@/lib/types";
 import { useRequireClientSession } from "@/hooks/use-require-client-session";
 import type { Role } from "@prisma/client";
+
+function logout() {
+  window.location.assign("/api/auth/logout");
+}
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -116,7 +119,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </div>
         </button>
         <button
-          onClick={() => signOut({ redirectTo: "/login" })}
+          onClick={logout}
           className="mt-1 flex items-center gap-2.5 rounded-[9px] px-2.5 py-2 text-[12.5px] font-medium text-[#9FB4C9] hover:bg-white/7 hover:text-white"
         >
           <LogOut size={15} /> Sair

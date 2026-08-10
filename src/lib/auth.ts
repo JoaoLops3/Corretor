@@ -5,7 +5,11 @@ import type { Role } from "@prisma/client";
 import { prisma } from "./prisma";
 import { initialsFromName } from "./types";
 
-const JWT_REFRESH_MS = 5 * 60 * 1000; // 5 min
+const JWT_PROFILE_REFRESH_MS = 5 * 60 * 1000;
+const useSecureCookies = process.env.NODE_ENV === "production";
+const sessionTokenName = useSecureCookies
+  ? "__Secure-authjs.session-token"
+  : "authjs.session-token";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   trustHost: true,
@@ -37,6 +41,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           teamId: user.teamId,
           teamName: user.team?.name ?? null,
           initials: initialsFromName(user.name),
+          sessionVersion: user.sessionVersion,
         };
       },
     }),
@@ -49,6 +54,17 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     maxAge: 60 * 60 * 8,
     updateAge: 60 * 30,
   },
+  cookies: {
+    sessionToken: {
+      name: sessionTokenName,
+      options: {
+        httpOnly: true,
+        sameSite: "lax",
+        path: "/",
+        secure: useSecureCookies,
+      },
+    },
+  },
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
@@ -57,42 +73,49 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         token.teamId = user.teamId;
         token.teamName = user.teamName;
         token.initials = user.initials;
-        token.active = true;
+        token.sessionVersion = user.sessionVersion ?? 0;
         token.refreshedAt = Date.now();
         return token;
       }
 
       const userId = (token.id as string | undefined) || (token.sub as string | undefined);
-      const refreshedAt = (token.refreshedAt as number | undefined) ?? 0;
-      if (!userId || Date.now() - refreshedAt <= JWT_REFRESH_MS) return token;
+      if (!userId) return null;
 
       const dbUser = await prisma.user.findUnique({
         where: { id: userId },
         include: { team: true },
       });
-      if (!dbUser || !dbUser.active) {
-        token.active = false;
-        return token;
+
+      // null → Auth.js limpa o cookie (sessão revogada / usuário inativo)
+      if (
+        !dbUser ||
+        !dbUser.active ||
+        dbUser.sessionVersion !== ((token.sessionVersion as number | undefined) ?? 0)
+      ) {
+        return null;
       }
 
-      token.id = dbUser.id;
-      token.role = dbUser.role;
-      token.teamId = dbUser.teamId;
-      token.teamName = dbUser.team?.name ?? null;
-      token.initials = initialsFromName(dbUser.name);
-      token.name = dbUser.name;
-      token.email = dbUser.email;
-      token.active = true;
-      token.refreshedAt = Date.now();
+      const refreshedAt = (token.refreshedAt as number | undefined) ?? 0;
+      if (Date.now() - refreshedAt > JWT_PROFILE_REFRESH_MS) {
+        token.role = dbUser.role;
+        token.teamId = dbUser.teamId;
+        token.teamName = dbUser.team?.name ?? null;
+        token.initials = initialsFromName(dbUser.name);
+        token.name = dbUser.name;
+        token.email = dbUser.email;
+        token.sessionVersion = dbUser.sessionVersion;
+        token.refreshedAt = Date.now();
+      }
+
       return token;
     },
     session({ session, token }) {
-      if (token.active === false) {
+      if (!token?.id) {
         session.user = undefined as unknown as typeof session.user;
         return session;
       }
       if (session.user) {
-        session.user.id = (token.id as string | undefined) || (token.sub as string);
+        session.user.id = token.id as string;
         session.user.role = token.role as Role | undefined;
         session.user.teamId = token.teamId as string | null | undefined;
         session.user.teamName = token.teamName as string | null | undefined;

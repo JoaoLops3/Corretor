@@ -1,11 +1,15 @@
 import { auth, signOut } from "@/lib/auth";
 import { revokeUserSessions } from "@/lib/auth-session";
 
-/** Limpa cookie órfão / JWT revogado. Server Components não podem setar cookies. */
-export async function GET() {
+/** Logout completo: revoga JWTs no banco e limpa cookie. */
+export async function POST() {
   const session = await auth();
   if (session?.user?.id) {
     await revokeUserSessions(session.user.id);
   }
-  await signOut({ redirectTo: "/login?reason=expired" });
+  await signOut({ redirectTo: "/login" });
+}
+
+export async function GET() {
+  return POST();
 }
