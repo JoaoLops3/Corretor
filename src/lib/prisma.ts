@@ -17,12 +17,22 @@ function createPrismaClient() {
   if (process.env.NODE_ENV !== "production") {
     globalForPrisma.pgPool = pool;
   }
-  const adapter = new PrismaPg(pool);
-  return new PrismaClient({ adapter });
+  return new PrismaClient({ adapter: new PrismaPg(pool) });
 }
 
-export const prisma = globalForPrisma.prisma ?? createPrismaClient();
-
-if (process.env.NODE_ENV !== "production") {
-  globalForPrisma.prisma = prisma;
+function getClient(): PrismaClient {
+  const client = globalForPrisma.prisma ?? createPrismaClient();
+  if (process.env.NODE_ENV !== "production") {
+    globalForPrisma.prisma = client;
+  }
+  return client;
 }
+
+/** Lazy: não exige DATABASE_URL no import (build/coleta de rotas na Vercel). */
+export const prisma = new Proxy({} as PrismaClient, {
+  get(_target, prop, receiver) {
+    const client = getClient();
+    const value = Reflect.get(client, prop, receiver);
+    return typeof value === "function" ? value.bind(client) : value;
+  },
+});
